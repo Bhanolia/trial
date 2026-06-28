@@ -54,17 +54,19 @@
   body { @apply bg-background text-foreground; }
 }
 
+/* Print styles */
 @media print {
   .no-print { display: none !important; }
   .print-only { display: block !important; }
   body { background: white; }
 }
 
+/* RPP table styles */
 .rpp-table { width: 100%; border-collapse: collapse; }
 .rpp-table th, .rpp-table td { border: 1px solid #333; padding: 6px 8px; }
 .rpp-section-header { background: #e0e7ff; font-weight: 700; text-align: center; }
 .editable-cell { min-height: 2rem; }
 
-.input-error { border-color: #ef4444 !important; }
-.input-error:focus-visible { --tw-ring-color: #ef4444 !important; }
-.error-text { color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; }
+/* Form validation */
+.input-error { @apply border-red-500 focus-visible:ring-red-500; }
+.error-text { @apply text-xs text-red-500 mt-1; }

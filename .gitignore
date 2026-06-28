@@ -1,19 +1,19 @@
 # Dependencies
-node_modules/
+node_modules
 .pnp
 .pnp.js
 .yarn/install-state.gz
 
 # Testing
-coverage/
+coverage
 
 # Next.js
 .next/
 out/
 
 # Production
-build/
-dist/
+build
+dist
 
 # Misc
 .DS_Store

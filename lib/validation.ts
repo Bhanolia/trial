@@ -1,3 +1,5 @@
+"use client";
+
 import { RPPData } from "@/types/rpp";
 
 export interface ValidationErrors {
@@ -12,7 +14,6 @@ export interface ValidationErrors {
 export function validateRPP(data: RPPData): { valid: boolean; errors: ValidationErrors } {
   const errors: ValidationErrors = {};
 
-  // Identitas validation
   const identitasErrors: Record<string, string> = {};
   if (!data.identitas.satuanPendidikan.trim()) identitasErrors.satuanPendidikan = "Wajib diisi";
   if (!data.identitas.mataPelajaran.trim()) identitasErrors.mataPelajaran = "Wajib diisi";
@@ -20,7 +21,6 @@ export function validateRPP(data: RPPData): { valid: boolean; errors: Validation
   if (!data.identitas.kelasSemester.trim()) identitasErrors.kelasSemester = "Wajib diisi";
   if (Object.keys(identitasErrors).length > 0) errors.identitas = identitasErrors;
 
-  // Desain validation
   const desainErrors: Record<string, string> = {};
   if (!data.desain.capaianPembelajaran.trim()) desainErrors.capaianPembelajaran = "Wajib diisi";
   if (!data.desain.topik.trim()) desainErrors.topik = "Wajib diisi";
@@ -29,7 +29,6 @@ export function validateRPP(data: RPPData): { valid: boolean; errors: Validation
   }
   if (Object.keys(desainErrors).length > 0) errors.desain = desainErrors;
 
-  // Asesmen validation
   const asesmenErrors: Record<string, string> = {};
   if (!data.asesmen.awal.trim()) asesmenErrors.awal = "Wajib diisi";
   if (!data.asesmen.proses.trim()) asesmenErrors.proses = "Wajib diisi";

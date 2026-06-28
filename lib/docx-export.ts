@@ -76,18 +76,31 @@ function createEmptyParagraphCell(options: CellOptions = {}): TableCell {
   });
 }
 
-function createSignatureCell(name: string): TableCell {
+function createSignatureCell(name: string, nip: string): TableCell {
   return new TableCell({
     children: [
-      new Paragraph({ spacing: { before: 600, after: 600 }, children: [new TextRun("")] }),
+      new Paragraph({ spacing: { before: 600, after: 100 }, children: [new TextRun("")] }),
       new Paragraph({
         children: [new TextRun({ text: name || "_________________", size: 20 })],
         alignment: AlignmentType.CENTER,
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: nip ? "NIP. " + nip : "NIP. _________________", size: 18 })],
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 100 },
       }),
     ],
     verticalAlign: VerticalAlign.CENTER,
     borders: DEFAULT_BORDER,
   });
+}
+
+// Helper for section labels that repeat across rows
+function sectionLabel(text: string, firstRow: boolean = true): TableCell {
+  if (firstRow) {
+    return createCell(text, { bold: true, shading: "F3F4F6" });
+  }
+  return createEmptyCell({ shading: "F3F4F6" });
 }
 
 export async function exportToDocx(data: RPPData) {
@@ -105,12 +118,12 @@ export async function exportToDocx(data: RPPData) {
 
   // ============================================
   // IDENTITAS (5 rows, 14 columns each)
-  // Structure: [label(1) rowSpan=5] [field(3)] [sep(2)] [value(8)]
+  // Structure: [label(1)] [field(3)] [sep(2)] [value(8)]
   // Total: 1+3+2+8 = 14
   // ============================================
   rows.push(new TableRow({
     children: [
-      createCell("IDENTITAS", { bold: true, rowSpan: 5, shading: "F3F4F6" }),
+      sectionLabel("IDENTITAS", true),
       createCell("Nama Satuan Pendidikan", { colSpan: 3 }),
       createCell(":", { colSpan: 2, align: AlignmentType.CENTER }),
       createCell(data.identitas.satuanPendidikan, { colSpan: 8 }),
@@ -118,6 +131,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTITAS", false),
       createCell("Mata Pelajaran", { colSpan: 3 }),
       createCell(":", { colSpan: 2, align: AlignmentType.CENTER }),
       createCell(data.identitas.mataPelajaran, { colSpan: 8 }),
@@ -125,6 +139,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTITAS", false),
       createCell("Nama Guru", { colSpan: 3 }),
       createCell(":", { colSpan: 2, align: AlignmentType.CENTER }),
       createCell(data.identitas.namaGuru, { colSpan: 8 }),
@@ -132,6 +147,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTITAS", false),
       createCell("Kelas/ semester", { colSpan: 3 }),
       createCell(":", { colSpan: 2, align: AlignmentType.CENTER }),
       createCell(data.identitas.kelasSemester, { colSpan: 8 }),
@@ -139,6 +155,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTITAS", false),
       createCell("Alokasi Waktu", { colSpan: 3 }),
       createCell("", { colSpan: 2 }),
       createCell(data.identitas.alokasiWaktu, { colSpan: 8 }),
@@ -150,15 +167,17 @@ export async function exportToDocx(data: RPPData) {
   // ============================================
   rows.push(new TableRow({
     children: [
-      createCell("IDENTIFIKASI", { bold: true, rowSpan: 19, shading: "F3F4F6" }),
+      sectionLabel("IDENTIFIKASI", true),
       createCell("KARAKTERISTIK PESERTA DIDIK", { bold: true, colSpan: 13, shading: "E0E7FF" }),
     ],
   }));
 
   // Kesiapan Belajar (2 rows)
-  // [label(1) rowSpan=2] [Belum Siap(6)] [Siap(5)] [Sangat Siap(1)] = 13 content cols
+  // [label(1)] [Kesiapan(1) rowSpan=2] [Belum Siap(6)] [Siap(5)] [Sangat Siap(1)]
+  // Total: 1+1+6+5+1 = 14
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Kesiapan Belajar", { rowSpan: 2 }),
       createCell("Belum Siap", { colSpan: 6 }),
       createCell("Siap", { colSpan: 5 }),
@@ -167,15 +186,17 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("", { colSpan: 6 }),
       createCell(data.identifikasi.karakteristikPeserta.kesiapanBelajar.deskripsi, { colSpan: 5 }),
-      createCell(".", { colSpan: 1, align: AlignmentType.CENTER }),
+      createCell(".", { colSpan: 1 }),
     ],
   }));
 
   // Minat (2 rows)
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Minat", { rowSpan: 2 }),
       createCell("Teknik", { colSpan: 6 }),
       createCell("Sains/Kedokteran", { colSpan: 5 }),
@@ -184,6 +205,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell(data.identifikasi.karakteristikPeserta.minat.deskripsi, { colSpan: 6 }),
       createCell("", { colSpan: 5 }),
       createCell("", { colSpan: 1 }),
@@ -193,6 +215,7 @@ export async function exportToDocx(data: RPPData) {
   // Bakat (2 rows)
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Bakat", { rowSpan: 2 }),
       createCell("", { colSpan: 6 }),
       createCell("", { colSpan: 5 }),
@@ -201,6 +224,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("", { colSpan: 6 }),
       createCell(data.identifikasi.karakteristikPeserta.bakat.deskripsi, { colSpan: 5 }),
       createCell("", { colSpan: 1 }),
@@ -210,6 +234,7 @@ export async function exportToDocx(data: RPPData) {
   // Profil Belajar (2 rows)
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Profil Belajar", { rowSpan: 2 }),
       createCell("Visual", { colSpan: 6 }),
       createCell("Auditori", { colSpan: 5 }),
@@ -218,6 +243,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("", { colSpan: 6 }),
       createCell("", { colSpan: 5 }),
       createCell(data.identifikasi.karakteristikPeserta.profilBelajar.deskripsi, { colSpan: 1 }),
@@ -227,37 +253,43 @@ export async function exportToDocx(data: RPPData) {
   // KARAKTERISTIK MATA PELAJARAN header
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("KARAKTERISTIK MATA PELAJARAN", { bold: true, colSpan: 13, shading: "E0E7FF" }),
     ],
   }));
 
-  // Mapel rows: [field(1)] [value(12)] = 13 content cols
+  // Mapel rows: [label(1)] [field(1)] [value(12)]
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Jenis pengetahuan yang akan dicapai"),
       createMultiLineCell(data.identifikasi.karakteristikMapel.jenisPengetahuan.map((p, i) => `${i + 1}. ${p}`), { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Relevansi dengan kehidupan nyata peserta didik"),
       createMultiLineCell(data.identifikasi.karakteristikMapel.relevansi.map((r, i) => `${i + 1}. ${r}`), { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Tingkat kesulitan"),
       createCell(data.identifikasi.karakteristikMapel.tingkatKesulitan, { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Struktur Materi"),
       createCell(data.identifikasi.karakteristikMapel.strukturMateri, { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("IDENTIFIKASI", false),
       createCell("Integrasi Nilai dan karakter"),
       createMultiLineCell(data.identifikasi.karakteristikMapel.integrasiNilai.map((n, i) => `${i + 1}. ${n}`), { colSpan: 12 }),
     ],
@@ -265,7 +297,7 @@ export async function exportToDocx(data: RPPData) {
 
   // ============================================
   // DPL (Dimensi Profil Lulusan) - Match Template exactly
-  // Template: 4 rows, 2 DPLs per row with checkmarks
+  // Template structure: 4 rows, 2 DPLs per row
   // [label(1) rowSpan=4] [empty(1)] [DPL left(8)] [check(1)] [DPL right(3)]
   // Total: 1+1+8+1+3 = 14
   // ============================================
@@ -274,33 +306,33 @@ export async function exportToDocx(data: RPPData) {
   rows.push(new TableRow({
     children: [
       createCell("Dimensi Profil Lulusan", { bold: true, rowSpan: 4, shading: "F3F4F6" }),
-      createCell("", { colSpan: 1 }),
+      createCell(""),
       createCell(`DPL 1\n${allDPL[0]?.label || "Beriman, bertakwa kepada Tuhan Yang Maha Esa, dan berakhlak mulia"}`, { colSpan: 8 }),
-      createCell(allDPL[0]?.checked ? "√" : "", { align: AlignmentType.CENTER, colSpan: 1 }),
+      createCell(allDPL[0]?.checked ? "√" : "", { align: AlignmentType.CENTER }),
       createCell(`DPL 5\n${allDPL[4]?.label || "Bernalar kritis"}`, { colSpan: 3 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
-      createCell("", { colSpan: 1 }),
+      createCell(""),
       createCell(`DPL 2\n${allDPL[1]?.label || "Berkebinekaan global"}`, { colSpan: 8 }),
-      createCell(allDPL[1]?.checked ? "√" : "", { align: AlignmentType.CENTER, colSpan: 1 }),
+      createCell(allDPL[1]?.checked ? "√" : "", { align: AlignmentType.CENTER }),
       createCell(`DPL 6\n${allDPL[5]?.label || "Kreatif"}`, { colSpan: 3 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
-      createCell("", { colSpan: 1 }),
+      createCell(""),
       createCell(`DPL 3\n${allDPL[2]?.label || "Bergotong royong"}`, { colSpan: 8 }),
-      createCell(allDPL[2]?.checked ? "√" : "", { align: AlignmentType.CENTER, colSpan: 1 }),
+      createCell(allDPL[2]?.checked ? "√" : "", { align: AlignmentType.CENTER }),
       createCell(`DPL 7\n${allDPL[6]?.label || "Cinta lingkungan"}`, { colSpan: 3 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
-      createCell("", { colSpan: 1 }),
+      createCell(""),
       createCell(`DPL 4\n${allDPL[3]?.label || "Mandiri"}`, { colSpan: 8 }),
-      createCell(allDPL[3]?.checked ? "√" : "", { align: AlignmentType.CENTER, colSpan: 1 }),
+      createCell(allDPL[3]?.checked ? "√" : "", { align: AlignmentType.CENTER }),
       createCell(`DPL 8\n${allDPL[7]?.label || "Sehat jasmani dan rohani"}`, { colSpan: 3 }),
     ],
   }));
@@ -310,34 +342,38 @@ export async function exportToDocx(data: RPPData) {
   // ============================================
   rows.push(new TableRow({
     children: [
-      createCell("DESAIN PEMBELAJARAN", { bold: true, rowSpan: 15, shading: "F3F4F6" }),
+      sectionLabel("DESAIN PEMBELAJARAN", true),
       createCell("Capaian Pembelajaran"),
       createCell(data.desain.capaianPembelajaran, { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Lintas Disiplin Ilmu"),
       createCell(data.desain.lintasDisiplin, { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Tujuan Pembelajaran"),
       createMultiLineCell(data.desain.tujuanPembelajaran.map((t, i) => `${i + 1}. ${t}`), { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Topik Pembelajaran"),
       createCell(data.desain.topik, { colSpan: 12 }),
     ],
   }));
 
-  // Praktik Pedagogis (2 rows) - FIXED
-  // [label(1) rowSpan=2] [Model(5)] [value(7)] = 13 content cols
+  // Praktik Pedagogis (2 rows)
+  // [label(1)] [Praktik Pedagogis(1) rowSpan=2] [Model Pembelajaran(5)] [value(7)]
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Praktik Pedagogis", { rowSpan: 2 }),
       createCell("Model Pembelajaran", { colSpan: 5 }),
       createCell(data.desain.modelPembelajaran, { colSpan: 7 }),
@@ -345,6 +381,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Metode Pembelajaran", { colSpan: 5 }),
       createCell(data.desain.metodePembelajaran, { colSpan: 7 }),
     ],
@@ -353,6 +390,7 @@ export async function exportToDocx(data: RPPData) {
   // Kemitraan Pembelajaran (3 rows)
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Kemitraan Pembelajaran", { rowSpan: 3 }),
       createCell("Lingkungan Sekolah", { colSpan: 5 }),
       createCell(data.desain.kemitraan.sekolah, { colSpan: 7 }),
@@ -360,12 +398,14 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Lingkungan Luar Sekolah", { colSpan: 5 }),
       createCell(data.desain.kemitraan.luarSekolah, { colSpan: 7 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Masyarakat", { colSpan: 5 }),
       createCell(data.desain.kemitraan.masyarakat, { colSpan: 7 }),
     ],
@@ -374,6 +414,7 @@ export async function exportToDocx(data: RPPData) {
   // Lingkungan Pembelajaran (3 rows)
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Lingkungan Pembelajaran", { rowSpan: 3 }),
       createCell("Budaya Belajar", { colSpan: 5 }),
       createCell(data.desain.lingkungan.budaya, { colSpan: 7 }),
@@ -381,12 +422,14 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Optimalisasi Ruang Fisik", { colSpan: 5 }),
       createCell(data.desain.lingkungan.fisik, { colSpan: 7 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Pemanfaatan Ruang Virtual", { colSpan: 5 }),
       createCell(data.desain.lingkungan.virtual, { colSpan: 7 }),
     ],
@@ -395,6 +438,7 @@ export async function exportToDocx(data: RPPData) {
   // Pemanfaatan Digital (3 rows)
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Pemanfaatan Digital", { rowSpan: 3 }),
       createCell("Perencanaan Pembelajaran", { colSpan: 5 }),
       createCell(data.desain.digital.perencanaan, { colSpan: 7 }),
@@ -402,12 +446,14 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Pelaksanaan Pembelajaran", { colSpan: 5 }),
       createCell(data.desain.digital.pelaksanaan, { colSpan: 7 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("DESAIN PEMBELAJARAN", false),
       createCell("Asesmen Pembelajaran", { colSpan: 5 }),
       createCell(data.desain.digital.asesmen, { colSpan: 7 }),
     ],
@@ -418,16 +464,17 @@ export async function exportToDocx(data: RPPData) {
   // ============================================
   rows.push(new TableRow({
     children: [
-      createCell("PENGALAMAN BELAJAR", { bold: true, rowSpan: 10, shading: "F3F4F6" }),
+      sectionLabel("PENGALAMAN BELAJAR", true),
       createCell("Langkah Pembelajaran", { bold: true, colSpan: 13, shading: "E0E7FF" }),
     ],
   }));
 
   // Awal (3 rows)
-  // Row 1: [Awal(1) rowSpan=3] [Prinsip(3) rowSpan=2] [Mindful(5)] [Meaningful(3)] [Joyful(1)]
-  // Total content: 1+3+5+3+1 = 13... with PENGALAMAN occupied = 14 ✓
+  // Row 1: [label(1)] [Awal(1) rowSpan=3] [Prinsip(3) rowSpan=2] [Mindful(5)] [Meaningful(3)] [Joyful(1)]
+  // Total: 1+1+3+5+3+1 = 14
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createCell("Awal", { rowSpan: 3 }),
       createCell("Prinsip Pembelajaran", { rowSpan: 2, colSpan: 3 }),
       createCell("Mindful\n(Berkesadaran)", { colSpan: 5 }),
@@ -435,25 +482,28 @@ export async function exportToDocx(data: RPPData) {
       createCell("Joyful\n(Menyenangkan)", { colSpan: 1 }),
     ],
   }));
-  // Row 2 (V marks): [Awal rowSpan] [Prinsip rowSpan] [V(5)] [empty(3)] [V(1)]
+  // Row 2 (V marks): [label(1)] [Awal rowSpan] [Prinsip rowSpan] [V(5)] [empty(3)] [V(1)]
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createCell(data.pengalaman.awal.mindful ? "V" : "", { colSpan: 5, align: AlignmentType.CENTER }),
       createCell(data.pengalaman.awal.meaningful ? "V" : "", { colSpan: 3, align: AlignmentType.CENTER }),
       createCell(data.pengalaman.awal.joyful ? "V" : "", { colSpan: 1, align: AlignmentType.CENTER }),
     ],
   }));
-  // Row 3 (Langkah): [Awal rowSpan] [content(12)]
+  // Row 3 (Langkah): [label(1)] [Awal rowSpan] [content(12)]
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createMultiLineCell(data.pengalaman.awal.langkah.map((l, i) => `${i + 1}. ${l}`), { colSpan: 12 }),
     ],
   }));
 
   // Inti (3 rows)
-  // [Inti(1) rowSpan=3] [Memahami(3)] [content(9)] = 13... with PENGALAMAN = 14 ✓
+  // [label(1)] [Inti(1) rowSpan=3] [Memahami(3)] [content(9)]
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createCell("Inti", { rowSpan: 3 }),
       createCell("Memahami", { colSpan: 3 }),
       createMultiLineCell(data.pengalaman.inti.memahami.map((l, i) => `${i + 1}. ${l}`), { colSpan: 9 }),
@@ -461,12 +511,14 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createCell("Mengaplikasi", { colSpan: 3 }),
       createMultiLineCell(data.pengalaman.inti.mengaplikasi.map((l, i) => `${i + 1}. ${l}`), { colSpan: 9 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createCell("Merefleksi", { colSpan: 3 }),
       createMultiLineCell(data.pengalaman.inti.merefleksi.map((l, i) => `${i + 1}. ${l}`), { colSpan: 9 }),
     ],
@@ -475,6 +527,7 @@ export async function exportToDocx(data: RPPData) {
   // Penutup (3 rows) - same structure as Awal
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createCell("Penutup", { rowSpan: 3 }),
       createCell("Prinsip Pembelajaran", { rowSpan: 2, colSpan: 3 }),
       createCell("Mindful\n(Berkesadaran)", { colSpan: 4 }),
@@ -484,6 +537,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createCell(data.pengalaman.penutup.mindful ? "V" : "", { colSpan: 4, align: AlignmentType.CENTER }),
       createCell(data.pengalaman.penutup.meaningful ? "V" : "", { colSpan: 4, align: AlignmentType.CENTER }),
       createCell(data.pengalaman.penutup.joyful ? "V" : "", { colSpan: 1, align: AlignmentType.CENTER }),
@@ -491,6 +545,7 @@ export async function exportToDocx(data: RPPData) {
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("PENGALAMAN BELAJAR", false),
       createMultiLineCell(data.pengalaman.penutup.langkah.map((l, i) => `${i + 1}. ${l}`), { colSpan: 12 }),
     ],
   }));
@@ -500,19 +555,21 @@ export async function exportToDocx(data: RPPData) {
   // ============================================
   rows.push(new TableRow({
     children: [
-      createCell("ASESMEN", { bold: true, rowSpan: 3, shading: "F3F4F6" }),
+      sectionLabel("ASESMEN", true),
       createCell("Asesmen pada Awal Pembelajaran"),
       createCell(data.asesmen.awal, { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("ASESMEN", false),
       createCell("Asesmen pada Proses Pembelajaran"),
       createCell(data.asesmen.proses, { colSpan: 12 }),
     ],
   }));
   rows.push(new TableRow({
     children: [
+      sectionLabel("ASESMEN", false),
       createCell("Asesmen pada Akhir Pembelajaran"),
       createCell(data.asesmen.akhir, { colSpan: 12 }),
     ],
@@ -537,22 +594,8 @@ export async function exportToDocx(data: RPPData) {
         new Paragraph({ children: [new TextRun({ text: "1. Rubrik penilaian observasi sikap selama proses diskusi dan mengerjakan tugas praktik", bold: true, size: 20 })], spacing: { after: 100 } }),
         new Table({
           rows: [
-            new TableRow({ children: [
-              createCell("Aspek", { bold: true, shading: "E0E7FF" }),
-              createCell("Indikator", { bold: true, shading: "E0E7FF" }),
-              createCell("Skor 4 (Sangat Baik)", { bold: true, shading: "E0E7FF" }),
-              createCell("Skor 3 (Baik)", { bold: true, shading: "E0E7FF" }),
-              createCell("Skor 2 (Cukup)", { bold: true, shading: "E0E7FF" }),
-              createCell("Skor 1 (Perlu Bimbingan)", { bold: true, shading: "E0E7FF" }),
-            ] }),
-            ...data.lampiran.rubrikSikap.map(r => new TableRow({ children: [
-              createCell(r.aspek, { bold: true }),
-              createCell(r.indikator),
-              createCell(r.skor4),
-              createCell(r.skor3),
-              createCell(r.skor2),
-              createCell(r.skor1),
-            ] })),
+            new TableRow({ children: [createCell("Aspek", { bold: true, shading: "E0E7FF" }), createCell("Indikator", { bold: true, shading: "E0E7FF" }), createCell("Skor 4 (Sangat Baik)", { bold: true, shading: "E0E7FF" }), createCell("Skor 3 (Baik)", { bold: true, shading: "E0E7FF" }), createCell("Skor 2 (Cukup)", { bold: true, shading: "E0E7FF" }), createCell("Skor 1 (Perlu Bimbingan)", { bold: true, shading: "E0E7FF" })] }),
+            ...data.lampiran.rubrikSikap.map(r => new TableRow({ children: [createCell(r.aspek, { bold: true }), createCell(r.indikator), createCell(r.skor4), createCell(r.skor3), createCell(r.skor2), createCell(r.skor1)] })),
           ],
           width: { size: 100, type: WidthType.PERCENTAGE },
         }),
@@ -565,21 +608,13 @@ export async function exportToDocx(data: RPPData) {
         new Paragraph({ spacing: { before: 400 } }),
         new Table({
           rows: [
+            new TableRow({ children: [createCell("Kepala Sekolah", { align: AlignmentType.CENTER }), createCell("Kurikulum", { align: AlignmentType.CENTER }), createCell("Guru", { align: AlignmentType.CENTER })] }),
+            new TableRow({ children: [createEmptyParagraphCell(), createEmptyParagraphCell(), createEmptyParagraphCell()] }),
             new TableRow({ children: [
-              createCell("Kepala Sekolah", { align: AlignmentType.CENTER }),
-              createCell("Kurikulum", { align: AlignmentType.CENTER }),
-              createCell("Guru", { align: AlignmentType.CENTER }),
-            ] }),
-            new TableRow({ children: [
-              createEmptyParagraphCell(),
-              createEmptyParagraphCell(),
-              createEmptyParagraphCell(),
-            ] }),
-            new TableRow({ children: [
-              createSignatureCell(data.lampiran.penandatangan.kepalaSekolah),
-              createSignatureCell(data.lampiran.penandatangan.kurikulum),
-              createSignatureCell(data.lampiran.penandatangan.guru),
-            ] }),
+              createSignatureCell(data.lampiran.penandatangan.kepalaSekolah, data.lampiran.penandatangan.nipKepalaSekolah || ""),
+              createSignatureCell(data.lampiran.penandatangan.kurikulum, data.lampiran.penandatangan.nipKurikulum || ""),
+              createSignatureCell(data.lampiran.penandatangan.guru, data.lampiran.penandatangan.nipGuru || ""),
+            ]}),
           ],
           width: { size: 100, type: WidthType.PERCENTAGE },
         }),

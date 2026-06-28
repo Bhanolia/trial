@@ -1,3 +1,5 @@
+"use client";
+
 export interface RPPData {
   identitas: Identitas;
   identifikasi: Identifikasi;
@@ -135,8 +137,11 @@ export interface RubrikCampaign {
 
 export interface Penandatangan {
   kepalaSekolah: string;
+  nipKepalaSekolah: string;
   kurikulum: string;
+  nipKurikulum: string;
   guru: string;
+  nipGuru: string;
 }
 
 // Official 8 DPL (Dimensi Profil Lulusan) — Kurikulum Merdeka Revisi 2025
@@ -195,10 +200,14 @@ export const defaultRPP: RPPData = {
   lampiran: {
     rubrikSikap: [
       { aspek: "Kesadaran diri", indikator: "Mengenali emosi & kondisi", skor4: "Sangat baik", skor3: "Baik", skor2: "Cukup", skor1: "Perlu bimbingan" },
+      { aspek: "Pengelolaan diri", indikator: "Mengatur emosi & tindakan", skor4: "Sangat baik", skor3: "Baik", skor2: "Cukup", skor1: "Perlu bimbingan" },
+      { aspek: "Kesadaran sosial", indikator: "Empati & kepedulian", skor4: "Sangat baik", skor3: "Baik", skor2: "Cukup", skor1: "Perlu bimbingan" },
+      { aspek: "Keterampilan berelasi", indikator: "Bekerja sama & komunikasi", skor4: "Sangat baik", skor3: "Baik", skor2: "Cukup", skor1: "Perlu bimbingan" },
+      { aspek: "Pengambilan keputusan", indikator: "Menyikapi situasi", skor4: "Sangat baik", skor3: "Baik", skor2: "Cukup", skor1: "Perlu bimbingan" },
     ],
     jobsheet: "",
     rubrikPresentasi: { group: [], individual: [], campaign: [] },
-    penandatangan: { kepalaSekolah: "", kurikulum: "", guru: "" },
+    penandatangan: { kepalaSekolah: "", nipKepalaSekolah: "", kurikulum: "", nipKurikulum: "", guru: "", nipGuru: "" },
   },
   tanggal: "",
   tempat: "",
@@ -253,6 +262,13 @@ export function migrateRPPData(raw: any): RPPData {
   }
   if (!data.lampiran.rubrikPresentasi) data.lampiran.rubrikPresentasi = defaultRPP.lampiran.rubrikPresentasi;
   if (!data.lampiran.penandatangan) data.lampiran.penandatangan = defaultRPP.lampiran.penandatangan;
+
+  // Migrate old penandatangan format (without NIP)
+  if (data.lampiran.penandatangan && !data.lampiran.penandatangan.nipKepalaSekolah) {
+    data.lampiran.penandatangan.nipKepalaSekolah = "";
+    data.lampiran.penandatangan.nipKurikulum = "";
+    data.lampiran.penandatangan.nipGuru = "";
+  }
 
   return data as RPPData;
 }
