@@ -50,50 +50,21 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-@layer components {
-  .rpp-table {
-    @apply w-full border-collapse border border-gray-300;
-  }
-  .rpp-table th,
-  .rpp-table td {
-    @apply border border-gray-300 p-2 text-sm;
-  }
-  .rpp-table th {
-    @apply bg-gray-100 font-semibold text-gray-700;
-  }
-  .rpp-section-header {
-    @apply bg-blue-50 text-blue-900 font-bold p-3 text-center border border-blue-200;
-  }
-  .editable-cell {
-    @apply w-full bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-300 rounded px-1 py-0.5 min-h-[1.5rem];
-  }
-  .editable-cell:hover {
-    @apply bg-blue-50/50;
-  }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
 }
 
 @media print {
-  .no-print {
-    display: none !important;
-  }
-  .print-only {
-    display: block !important;
-  }
-  body {
-    background: white;
-  }
-  /* Ensure preview prints nicely */
-  .rpp-preview {
-    box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
-  }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: white; }
 }
+
+.rpp-table { width: 100%; border-collapse: collapse; }
+.rpp-table th, .rpp-table td { border: 1px solid #333; padding: 6px 8px; }
+.rpp-section-header { background: #e0e7ff; font-weight: 700; text-align: center; }
+.editable-cell { min-height: 2rem; }
+
+.input-error { border-color: #ef4444 !important; }
+.input-error:focus-visible { --tw-ring-color: #ef4444 !important; }
+.error-text { color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; }
