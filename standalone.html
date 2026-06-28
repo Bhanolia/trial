@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPP Editor - Rencana Pelaksanaan Pembelajaran</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    width: 36px; height: 36px;
+    background: var(--primary);
+    color: white;
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 18px;
+  }
+  .header-title { font-size: 16px; font-weight: 700; }
+  .header-sub { font-size: 12px; color: var(--text-muted); }
+  .btn {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--primary-light); border-color: var(--primary); }
+  .btn-primary {
+    background: var(--primary); color: white; border-color: var(--primary);
+  }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-sm { padding: 6px 10px; font-size: 12px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 20px;
+    background: var(--card); padding: 6px; border-radius: var(--radius);
+    border: 1px solid var(--border); overflow-x: auto;
+  }
+  .tab {
+    padding: 8px 16px; border: none; background: transparent;
+    cursor: pointer; border-radius: 6px; font-size: 13px;
+    white-space: nowrap; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tab.active { background: var(--primary); color: white; }
+  .tab:hover:not(.active) { background: var(--primary-light); color: var(--primary); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 18px; font-weight: 700; color: #1e3a5f;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+  input, textarea, select {
+    padding: 10px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 14px; font-family: inherit;
+    background: var(--card); color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .list-item {
+    display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px;
+  }
+  .list-item .num { font-size: 13px; color: var(--text-muted); min-width: 20px; padding-top: 10px; }
+  .list-item textarea { flex: 1; }
+  .checkbox-group {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .checkbox-group label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; cursor: pointer; color: var(--text);
+  }
+  .checkbox-group input[type="checkbox"] {
+    width: 16px; height: 16px; accent-color: var(--primary);
+  }
+  table.rubrik {
+    width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px;
+  }
+  table.rubrik th, table.rubrik td {
+    border: 1px solid var(--border); padding: 8px; text-align: left;
+  }
+  table.rubrik th { background: var(--primary-light); font-weight: 600; }
+  table.rubrik textarea { width: 100%; border: none; padding: 4px; min-height: 50px; }
+  table.rubrik textarea:focus { box-shadow: none; outline: 1px solid var(--primary); }
+  .saved-badge {
+    font-size: 12px; color: #16a34a; background: #dcfce7;
+    padding: 4px 10px; border-radius: 20px; display: none;
+  }
+  .saved-badge.show { display: inline-block; }
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; }
+    .panel { display: block !important; }
+    .card { border: 1px solid #000; break-inside: avoid; }
+    input, textarea { border: none; background: transparent; }
+  }
+  .dpl-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .dpl-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .dpl-item:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .dpl-item input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    margin-top: 2px;
+    cursor: pointer;
+  }
+  .dpl-item span {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .dpl-grid { grid-template-columns: 1fr; }
+    .header { padding: 10px; }
+    .container { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header no-print">
+  <div class="header-left">
+    <div class="logo">R</div>
+    <div>
+      <div class="header-title">RPP Editor</div>
+      <div class="header-sub">Rencana Pelaksanaan Pembelajaran</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span class="saved-badge" id="savedBadge">Tersimpan otomatis</span>
+    <button class="btn btn-sm" onclick="resetData()">&#x21bb; Reset</button>
+    <button class="btn btn-sm" onclick="window.print()">&#x2399; Print</button>
+  </div>
+</header>
+
+<div class="container no-print">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('identitas', this)">&#x1F4C4; Identitas</button>
+    <button class="tab" onclick="switchTab('identifikasi', this)">&#x1F465; Identifikasi</button>
+    <button class="tab" onclick="switchTab('desain', this)">&#x1F4A1; Desain</button>
+    <button class="tab" onclick="switchTab('pengalaman', this)">&#x1F393; Pengalaman</button>
+    <button class="tab" onclick="switchTab('asesmen', this)">&#x2705; Asesmen</button>
+    <button class="tab" onclick="switchTab('lampiran', this)">&#x1F4CB; Lampiran</button>
+  </div>
+
+  <!-- IDENTITAS -->
+  <div id="identitas" class="panel active">
+    <div class="card">
+      <div class="card-title">&#x1F4C4; Identitas Pembelajaran</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nama Satuan Pendidikan</label>
+          <input id="id_satuan" placeholder="SMK...">
+        </div>
+        <div class="form-group">
+          <label>Mata Pelajaran</label>
+          <input id="id_mapel" placeholder="Nama mata pelajaran...">
+        </div>
+        <div class="form-group">
+          <label>Nama Guru</label>
+          <input id="id_guru" placeholder="Nama lengkap guru...">
+        </div>
+        <div class="form-group">
+          <label>Kelas / Semester</label>
+          <input id="id_kelas" placeholder="X / Gasal">
+        </div>
+        <div class="form-group full">
+          <label>Alokasi Waktu</label>
+          <input id="id_waktu" placeholder="1 X 3 JP x @45 menit">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDENTIFIKASI -->
+  <div id="identifikasi" class="panel">
+    <div class="card">
+      <div class="card-title">&#x1F465; Karakteristik Peserta Didik</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Kesiapan Belajar - Level</label>
+          <input id="kp_level">
+          <label style="margin-top:8px">Deskripsi</label>
+          <textarea id="kp_level_desc" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Minat - Bidang</label>
+          <input id="kp_minat">
+          <label style="margin-top:8px">Deskripsi</label>
+          <textarea id="kp_minat_desc" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Bakat - Bidang</label>
+          <input id="kp_bakat">
+          <label style="margin-top:8px">Deskripsi</label>
+          <textarea id="kp_bakat_desc" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Profil Belajar - Gaya</label>
+          <input id="kp_profil">
+          <label style="margin-top:8px">Deskripsi</label>
+          <textarea id="kp_profil_desc" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#x1F4D6; Karakteristik Mata Pelajaran</div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Jenis Pengetahuan</label>
+        <div id="list_pengetahuan"></div>
+        <button class="btn btn-sm" onclick="addListItem('list_pengetahuan')">+ Tambah</button>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Relevansi</label>
+        <div id="list_relevansi"></div>
+        <button class="btn btn-sm" onclick="addListItem('list_relevansi')">+ Tambah</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tingkat Kesulitan</label>
+          <textarea id="km_kesulitan" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Struktur Materi</label>
+          <textarea id="km_struktur" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label>Integrasi Nilai & Karakter</label>
+        <div id="list_nilai"></div>
+        <button class="btn btn-sm" onclick="addListItem('list_nilai')">+ Tambah</button>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label>Dimensi Profil Lulusan</label>
+        <div id="list_dpl"></div>
+        <button class="btn btn-sm" onclick="addListItem('list_dpl')">+ Tambah DPL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESAIN -->
+  <div id="desain" class="panel">
+    <div class="card">
+      <div class="card-title">&#x1F4A1; Desain Pembelajaran</div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Capaian Pembelajaran</label>
+        <textarea id="ds_capaian" rows="4"></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Lintas Disiplin Ilmu</label>
+          <input id="ds_lintas">
+        </div>
+        <div class="form-group">
+          <label>Topik Pembelajaran</label>
+          <input id="ds_topik">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label>Tujuan Pembelajaran</label>
+        <div id="list_tujuan"></div>
+        <button class="btn btn-sm" onclick="addListItem('list_tujuan')">+ Tambah Tujuan</button>
+      </div>
+      <div class="form-grid" style="margin-top:16px">
+        <div class="form-group">
+          <label>Model Pembelajaran</label>
+          <input id="ds_model">
+        </div>
+        <div class="form-group">
+          <label>Metode Pembelajaran</label>
+          <input id="ds_metode">
+        </div>
+      </div>
+      <h3 style="margin:24px 0 12px;font-size:16px;color:#1e3a5f;">Kemitraan Pembelajaran</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Lingkungan Sekolah</label>
+          <textarea id="ds_kemitraan_s" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Lingkungan Luar Sekolah</label>
+          <textarea id="ds_kemitraan_l" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Masyarakat</label>
+          <textarea id="ds_kemitraan_m" rows="3"></textarea>
+        </div>
+      </div>
+      <h3 style="margin:24px 0 12px;font-size:16px;color:#1e3a5f;">Lingkungan Pembelajaran</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Budaya Belajar</label>
+          <textarea id="ds_ling_budaya" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Ruang Fisik</label>
+          <textarea id="ds_ling_fisik" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Ruang Virtual</label>
+          <textarea id="ds_ling_virtual" rows="2"></textarea>
+        </div>
+      </div>
+      <h3 style="margin:24px 0 12px;font-size:16px;color:#1e3a5f;">Pemanfaatan Digital</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Perencanaan</label>
+          <input id="ds_dig_rencana">
+        </div>
+        <div class="form-group">
+          <label>Pelaksanaan</label>
+          <input id="ds_dig_laksana">
+        </div>
+        <div class="form-group">
+          <label>Asesmen</label>
+          <input id="ds_dig_asesmen">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENGALAMAN -->
+  <div id="pengalaman" class="panel">
+    <div class="card">
+      <div class="card-title">&#x1F393; Pengalaman Belajar</div>
+      <h3 style="margin-bottom:12px;font-size:16px;color:#1e3a5f;">Kegiatan Awal</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="pa_mindful"> Mindful (Berkesadaran)</label>
+        <label><input type="checkbox" id="pa_meaningful"> Meaningful (Bermakna)</label>
+        <label><input type="checkbox" id="pa_joyful"> Joyful (Menyenangkan)</label>
+      </div>
+      <div id="list_awal"></div>
+      <button class="btn btn-sm" onclick="addListItem('list_awal')" style="margin:8px 0 24px">+ Tambah Langkah</button>
+
+      <h3 style="margin-bottom:12px;font-size:16px;color:#1e3a5f;">Kegiatan Inti - Memahami</h3>
+      <div id="list_memahami"></div>
+      <button class="btn btn-sm" onclick="addListItem('list_memahami')" style="margin:8px 0 24px">+ Tambah</button>
+
+      <h3 style="margin-bottom:12px;font-size:16px;color:#1e3a5f;">Kegiatan Inti - Mengaplikasi</h3>
+      <div id="list_mengaplikasi"></div>
+      <button class="btn btn-sm" onclick="addListItem('list_mengaplikasi')" style="margin:8px 0 24px">+ Tambah</button>
+
+      <h3 style="margin-bottom:12px;font-size:16px;color:#1e3a5f;">Kegiatan Inti - Merefleksi</h3>
+      <div id="list_merefleksi"></div>
+      <button class="btn btn-sm" onclick="addListItem('list_merefleksi')" style="margin:8px 0 24px">+ Tambah</button>
+
+      <h3 style="margin-bottom:12px;font-size:16px;color:#1e3a5f;">Kegiatan Penutup</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="pp_mindful"> Mindful</label>
+        <label><input type="checkbox" id="pp_meaningful"> Meaningful</label>
+        <label><input type="checkbox" id="pp_joyful"> Joyful</label>
+      </div>
+      <div id="list_penutup"></div>
+      <button class="btn btn-sm" onclick="addListItem('list_penutup')" style="margin-top:8px">+ Tambah Langkah</button>
+    </div>
+  </div>
+
+  <!-- ASESMEN -->
+  <div id="asesmen" class="panel">
+    <div class="card">
+      <div class="card-title">&#x2705; Asesmen Pembelajaran</div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Asesmen Awal</label>
+        <textarea id="as_awal" rows="3"></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Asesmen Proses</label>
+        <textarea id="as_proses" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Asesmen Akhir</label>
+        <textarea id="as_akhir" rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAMPIRAN -->
+  <div id="lampiran" class="panel">
+    <div class="card">
+      <div class="card-title">&#x1F4CB; Lampiran</div>
+      <h3 style="margin-bottom:12px;font-size:16px;color:#1e3a5f;">Rubrik Penilaian Sikap</h3>
+      <div style="overflow-x:auto">
+        <table class="rubrik" id="rubrik_sikap">
+          <thead>
+            <tr>
+              <th>Aspek</th><th>Indikator</th><th>Skor 4</th><th>Skor 3</th><th>Skor 2</th><th>Skor 1</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button class="btn btn-sm" onclick="addRubrikRow()" style="margin-bottom:24px">+ Tambah Aspek</button>
+
+      <div class="form-grid" style="margin-bottom:24px">
+        <div class="form-group">
+          <label>Link Jobsheet</label>
+          <input id="lam_jobsheet" placeholder="https://...">
+        </div>
+      </div>
+      <div class="form-grid" style="margin-bottom:24px">
+        <div class="form-group">
+          <label>Tempat</label>
+          <input id="lam_tempat">
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input id="lam_tanggal">
+        </div>
+      </div>
+      <h3 style="margin-bottom:12px;font-size:16px;color:#1e3a5f;">Penandatangan</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Kepala Sekolah</label>
+          <input id="lam_ks" placeholder="Nama Kepala Sekolah">
+        </div>
+        <div class="form-group">
+          <label>Kurikulum</label>
+          <input id="lam_kur" placeholder="Nama Koordinator Kurikulum">
+        </div>
+        <div class="form-group">
+          <label>Guru</label>
+          <input id="lam_guru" placeholder="Nama Guru">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT PREVIEW -->
+<div class="print-only" style="display:none">
+  <div style="max-width:800px;margin:0 auto;padding:40px;">
+    <h1 style="text-align:center;font-size:24px;margin-bottom:8px;">RENCANA PELAKSANAAN PEMBELAJARAN</h1>
+    <h2 style="text-align:center;font-size:18px;margin-bottom:32px;">DEEP LEARNING</h2>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #000;font-size:13px;">
+      <tr><td style="border:1px solid #000;padding:8px;font-weight:bold;background:#f0f0f0" rowspan="5">IDENTITAS</td><td style="border:1px solid #000;padding:8px">Nama Satuan Pendidikan</td><td style="border:1px solid #000;padding:8px">:</td><td colspan="8" style="border:1px solid #000;padding:8px" id="print_satuan"></td></tr>
+      <tr><td style="border:1px solid #000;padding:8px">Mata Pelajaran</td><td style="border:1px solid #000;padding:8px">:</td><td colspan="8" style="border:1px solid #000;padding:8px" id="print_mapel"></td></tr>
+      <tr><td style="border:1px solid #000;padding:8px">Nama Guru</td><td style="border:1px solid #000;padding:8px">:</td><td colspan="8" style="border:1px solid #000;padding:8px" id="print_guru"></td></tr>
+      <tr><td style="border:1px solid #000;padding:8px">Kelas/ semester</td><td style="border:1px solid #000;padding:8px">:</td><td colspan="8" style="border:1px solid #000;padding:8px" id="print_kelas"></td></tr>
+      <tr><td style="border:1px solid #000;padding:8px">Alokasi Waktu</td><td style="border:1px solid #000;padding:8px"></td><td colspan="8" style="border:1px solid #000;padding:8px" id="print_waktu"></td></tr>
+    </table>
+    <p style="text-align:right;margin-top:40px" id="print_ttd"></p>
+  </div>
+</div>
+
+<script>
+// Default data
+const defaultData = {
+  identitas: { satuan: 'SMK', mapel: '', guru: '', kelas: 'X / Gasal', waktu: '1 X 3 JP x @45 menit' },
+  kp: { level: 'Siap', levelDesc: 'Murid memiliki keinginan belajar tentang Kendaraan Ringan/Mobil.', minat: 'Teknik', minatDesc: 'Murid menunjukkan minat yang tinggi dalam kegiatan pembelajaran kendaraan ringan/mobil.', bakat: 'Teknik', bakatDesc: 'Murid menunjukkan ketertarikan yang tinggi dalam mempelajari kendaraan ringan/mobil.', profil: 'Kinestetik', profilDesc: 'Murid memiliki profil belajar/gaya belajar kinestetik.' },
+  km: { pengetahuan: ['Pemahaman tentang konsep energi','Pemahaman hubungan energi sampingan yang dihasilkan dengan potensi bahaya dan cara melindungi diri','Pembelajaran tentang peralatan bertenaga (power tools)','Pemahaman kepada murid tentang jenis, fungsi, dan penggunaan peralatan bertenaga (power tools)'], relevansi: ['Energi yang terlibat pada penggunaan alat dapat memiliki potensi bahaya','Memahami pentingnya penggunaan dan perawatan peralatan bertenaga (power tools) pada bidang otomotif','Murid belajar bekerja terstruktur','Belajar berkoordinasi dalam satu kelompok kerja','Murid terbiasa mengikuti SOP, memahami pentingnya waktu, kualitas, dan keselamatan kerja.'], kesulitan: 'Tingkat kesulitan untuk mempelajari materi ini dalam rentang rendah sampai sedang', struktur: 'Struktur Materi', nilai: ['Nilai agama dan budi pekerti','Berpikir kritis dan pemecahan masalah (critical thinking and problem solving)','Berkomunikasi (communication)','Berkolaborasi (collaboration)','Safety / Keselamatan'], dpl: [
+      { label: 'DPL 1 - Keimanan dan ketakwaan terhadap Tuhan yang Maha Esa', checked: true },
+      { label: 'DPL 2 - Kewargaan', checked: false },
+      { label: 'DPL 3 - Penalaran Kritis', checked: true },
+      { label: 'DPL 4 - Kreativitas', checked: false },
+      { label: 'DPL 5 - Kolaborasi', checked: true },
+      { label: 'DPL 6 - Kemandirian', checked: false },
+      { label: 'DPL 7 - Kesehatan', checked: false },
+      { label: 'DPL 8 - Komunikasi', checked: true }
+    ] },
+  desain: { capaian: 'Pada akhir fase E, murid mampu: melakukan menggunakan peralatan umum (general tools), alat perlengkapan bengkel (equipment tools), peralatan servis khusus (special service tools), alat ukur (measuring tools), dan alat diagnosis (diagnostic tools).', lintas: 'Teknik Otomotif, IPAS, dan Bahasa Inggris', tujuan: ['Mengidentifikasi perubahan energi pada berbagai alat rumah tangga','Mengaitkan energi sampingan dengan potensi bahaya dan cara melindungi diri','Memahami jenis peralatan bertenaga (power tools) di bidang otomotif','Memahami fungsi peralatan bertenaga (power tools) di bidang otomotif','Memahami pemahaman peralatan bertenaga (power tools) di bidang otomotif','Memahami perawatan peralatan bertenaga (power tools) di bidang otomotif','Memahami vocabulari untuk membuat prosedur penggunaan alat dalam bahasa Inggris','Mampu mempresentasikan hasil diskusi tentang prosedur penggunaan alat.'], topik: 'Sistem Pemindah Tenaga Kendaraan Ringan', model: 'Pembelajaran Berbasis Proyek (PjBL)', metode: 'Diskusi Kelompok, Wawancara, Praktek dan Presentasi', kemitraan: { s: 'Ruang kelas, Workshop Otomotif, Rekan sejawat guru', l: 'Dunia Industri Mitra sekolah', m: 'Kelompok wirausaha/Komunitas usaha lokal, Orang tua' }, lingkungan: { budaya: 'Berkesadaran, Kolaborasi, Berfikir kritis', fisik: 'Lingkungan Sekolah (workshop otomotif, perpustakaan)', virtual: 'Platform pembelajaran berbasis games wayground' }, digital: { rencana: 'Google Doc', laksana: 'Mentimeter, Canva, WhatsApp Application', asesmen: 'Wayground' } },
+  pengalaman: { awal: { mindful: true, meaningful: true, joyful: false, langkah: ['Guru membuka pelajaran dengan salam, doa bersama dan sapaan ramah untuk menciptakan suasana positif (Kesadaran diri)','Guru dan murid melakukan safety talk dengan menunjuk logo roda gigi dengan mengucap KESELAMATAN ADALAH TANGGUNG JAWAB SAYA YES.','Guru menyapa murid dan melakukan pemeriksaan kehadiran bersama dengan guru dan menerapkan 5S di area kelas atau bengkel (Manajemen diri)','Murid bersama dengan guru membahas tentang kesepakatan yang akan diterapkan dalam pembelajaran.','Guru menyampaikan tujuan pembelajaran dan memberikan penjelasan bahwa selama pertemuan murid diharapkan mengikuti pembelajaran secara luring di lingkungan sekolah.','Guru membangkitkan semangat dengan yel-yel SMK dan TKR untuk pemusatan konsentrasi murid.','Guru menumbuhkan kesadaran murid bahwa kemampuan mengidentifikasi, memanfaatkan, dan merawat peralatan bertenaga merupakan modal yang sangat penting.','Guru menyampaikan contoh-contoh ini, melalui berbagai media seperti video maupun artikel.','Guru memberikan pertanyaan pemantik untuk menstimulasi kesadaran murid dalam mempelajari materi.'] }, memahami: ['Guru membawa benda nyata: senter, hairdryer, lem tembak, blender, kemudian mengajukan pertanyaan: Apa yang menyebabkan benda-benda ini bekerja?','Berdiskusi, membaca artikel, eksplorasi sumber informasi pada buku, e-book, artikel, dan websites melalui internet tentang berbagai jenis energi dan aplikasinya pada berbagai alat','Guru menyampaikan kegiatan yang harus diselesaikan murid secara mandiri (praktik penggunaan alat berkelompok)','Murid menyalakan senter, hairdryer, lem tembak, blender','Murid mengisi tabel hasil penggunaan alat pada lembar yang dibagikan','Guru menjelaskan hubungan jika power tools yang digunakan pada di bengkel otomotif juga memiliki perubahan energi termasuk energi sampingan','Membuat peta konsep tentang power tools','Guru menjelaskan garis besar materi tentang power tools','Guru memberikan materi tentang power tools melalui video pembelajaran'], mengaplikasi: ['Guru membagi murid dalam 6 kelompok. Anggota kelompok ditentukan berdasarkan hasil identifikasi karakteristik murid yang diperoleh melalui asesmen awal.','Murid mempraktikkan jobsheets yang telah disediakan','Setelah mempraktikkan jobsheets dan mengumpulkan dokumentasi yang dibutuhkan, murid berdiskusi','Dalam kegiatan diskusi, guru berperan sebagai fasilitator dan hadir untuk mengkonfirmasi pemahaman murid','Guru membimbing masing-masing kelompok sesuai dengan kebutuhan mereka','Hasil diskusi dikirimkan melalui GDrive. Masing-masing kelompok bebas memilih format yang digunakan','Murid mempresentasikan hasil diskusi berupa prosedure penggunaan power tools dalam bahasa Inggris'], merefleksi: ['Murid mendapatkan umpan balik dari teman dan guru','Murid melakukan evaluasi diri terhadap pencapaian tujuan pembelajaran.','Guru membimbing murid melakukan refleksi pembelajaran, dengan menyampaikan perasaan selama pembelajaran'] }, penutup: { mindful: true, meaningful: true, joyful: true, langkah: ['Pendidik dan murid menyimpulkan pembelajaran.','Pendidik mengajak murid merencanakan pembelajaran selanjutnya dan strategi belajar yang akan digunakan.','Pendidik memuliakan murid dengan menghargai pencapaian proyeknya.','Guru menyampaikan rencana kegiatan pembelajaran pada pertemuan berikutnya.','Guru menyampaikan motivasi agar murid lebih menyadari akan pentingnya mempelajari materi power tools'] } },
+  asesmen: { awal: 'Kuis singkat pengetahuan awal tentang power tools', proses: 'Keterampilan, Observasi sikap, Laporan jobsheets, Presentasi laporan praktikum', akhir: 'Tes tertulis' },
+  lampiran: { rubrik: [{ aspek: 'Kesadaran diri', indikator: 'Mengenali emosi & kondisi saat praktik', skor4: 'Murid tenang, percaya diri, fokus penuh', skor3: 'Kadang gugup tapi bisa mengontrol diri', skor2: 'Sering bingung, butuh arahan guru', skor1: 'Mudah panik, tidak percaya diri, mengganggu praktik' },{ aspek: 'Pengelolaan diri', indikator: 'Mengatur emosi & mengendalikan tindakan', skor4: 'Selalu disiplin, mematuhi instruksi & SOP keselamatan', skor3: 'Umumnya disiplin, hanya kadang lupa prosedur', skor2: 'Sering lalai, perlu diingatkan berkali-kali', skor1: 'Tidak mampu mengendalikan diri, berisiko bahaya' },{ aspek: 'Kesadaran sosial', indikator: 'Menunjukkan empati & kepedulian', skor4: 'Peka terhadap teman yang kesulitan, sigap membantu', skor3: 'Menyadari kesulitan teman, kadang memberi dukungan', skor2: 'Kurang peduli, hanya fokus pada dirinya sendiri', skor1: 'Tidak peduli, bahkan mengabaikan keselamatan orang lain' },{ aspek: 'Keterampilan berelasi', indikator: 'Bekerja sama & komunikasi', skor4: 'Aktif bekerja sama, komunikasi jelas & sopan', skor3: 'Bekerja sama cukup baik, komunikasi kadang kurang jelas', skor2: 'Kerja sama terbatas, komunikasi kurang', skor1: 'Sulit bekerja sama, komunikasi buruk / menyinggung' },{ aspek: 'Pengambilan keputusan bertanggung jawab', indikator: 'Menyikapi situasi & keselamatan', skor4: 'Selalu memilih langkah aman, menggunakan APD lengkap', skor3: 'Umumnya memilih langkah aman, kadang terburu-buru', skor2: 'Sering ceroboh, lupa APD', skor1: 'Mengabaikan SOP, membahayakan diri & orang lain' }], jobsheet: 'https://drive.google.com/file/d/1L74tZCx6pqAKzDtwM53jSM8KZD0TS8xr/view?usp=sharing', tempat: 'Kota', tanggal: '02 Juni 2025', ttd: { ks: '', kur: '', guru: '' } }
+};
+
+let data = JSON.parse(JSON.stringify(defaultData));
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function addListItem(containerId) {
+  const container = document.getElementById(containerId);
+  const idx = container.children.length;
+  const div = document.createElement('div');
+  div.className = 'list-item';
+  div.innerHTML = `<span class="num">${idx + 1}.</span><textarea rows="2" oninput="saveToMemory()"></textarea><button class="btn btn-sm" onclick="this.parentElement.remove();renumber('${containerId}');saveToMemory()">&#x1F5D1;</button>`;
+  container.appendChild(div);
+}
+
+function renumber(containerId) {
+  const container = document.getElementById(containerId);
+  container.querySelectorAll('.num').forEach((n, i) => n.textContent = (i + 1) + '.');
+}
+
+function addRubrikRow() {
+  const tbody = document.querySelector('#rubrik_sikap tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><textarea oninput="saveToMemory()"></textarea></td><td><textarea oninput="saveToMemory()"></textarea></td><td><textarea oninput="saveToMemory()"></textarea></td><td><textarea oninput="saveToMemory()"></textarea></td><td><textarea oninput="saveToMemory()"></textarea></td><td><textarea oninput="saveToMemory()"></textarea></td><td><button class="btn btn-sm" onclick="this.closest('tr').remove();saveToMemory()">&#x1F5D1;</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function populateList(containerId, items) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.innerHTML = `<span class="num">${i + 1}.</span><textarea rows="2" oninput="saveToMemory()">${item}</textarea><button class="btn btn-sm" onclick="this.parentElement.remove();renumber('${containerId}');saveToMemory()">&#x1F5D1;</button>`;
+    container.appendChild(div);
+  });
+}
+
+function populateRubrik(rows) {
+  const tbody = document.querySelector('#rubrik_sikap tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><textarea oninput="saveToMemory()">${r.aspek}</textarea></td><td><textarea oninput="saveToMemory()">${r.indikator}</textarea></td><td><textarea oninput="saveToMemory()">${r.skor4}</textarea></td><td><textarea oninput="saveToMemory()">${r.skor3}</textarea></td><td><textarea oninput="saveToMemory()">${r.skor2}</textarea></td><td><textarea oninput="saveToMemory()">${r.skor1}</textarea></td><td><button class="btn btn-sm" onclick="this.closest('tr').remove();saveToMemory()">&#x1F5D1;</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function loadData() {
+  const saved = localStorage.getItem('rpp-data-v1');
+  if (saved) data = JSON.parse(saved);
+
+  // Identitas
+  document.getElementById('id_satuan').value = data.identitas.satuan;
+  document.getElementById('id_mapel').value = data.identitas.mapel;
+  document.getElementById('id_guru').value = data.identitas.guru;
+  document.getElementById('id_kelas').value = data.identitas.kelas;
+  document.getElementById('id_waktu').value = data.identitas.waktu;
+
+  // Karakteristik Peserta
+  document.getElementById('kp_level').value = data.kp.level;
+  document.getElementById('kp_level_desc').value = data.kp.levelDesc;
+  document.getElementById('kp_minat').value = data.kp.minat;
+  document.getElementById('kp_minat_desc').value = data.kp.minatDesc;
+  document.getElementById('kp_bakat').value = data.kp.bakat;
+  document.getElementById('kp_bakat_desc').value = data.kp.bakatDesc;
+  document.getElementById('kp_profil').value = data.kp.profil;
+  document.getElementById('kp_profil_desc').value = data.kp.profilDesc;
+
+  // Karakteristik Mapel
+  populateList('list_pengetahuan', data.km.pengetahuan);
+  populateList('list_relevansi', data.km.relevansi);
+  document.getElementById('km_kesulitan').value = data.km.kesulitan;
+  document.getElementById('km_struktur').value = data.km.struktur;
+  populateList('list_nilai', data.km.nilai);
+  // DPL Checkboxes
+  const dplContainer = document.getElementById('list_dpl');
+  dplContainer.innerHTML = '<div class="dpl-grid">' + data.km.dpl.map((item, i) => 
+    '<label class="dpl-item"><input type="checkbox" ' + (item.checked ? 'checked' : '') + ' onchange="updateDPL(' + i + ', this.checked)" class="dpl-checkbox"> <span>' + item.label + '</span></label>'
+  ).join('') + '</div>';
+
+  // Desain
+  document.getElementById('ds_capaian').value = data.desain.capaian;
+  document.getElementById('ds_lintas').value = data.desain.lintas;
+  populateList('list_tujuan', data.desain.tujuan);
+  document.getElementById('ds_topik').value = data.desain.topik;
+  document.getElementById('ds_model').value = data.desain.model;
+  document.getElementById('ds_metode').value = data.desain.metode;
+  document.getElementById('ds_kemitraan_s').value = data.desain.kemitraan.s;
+  document.getElementById('ds_kemitraan_l').value = data.desain.kemitraan.l;
+  document.getElementById('ds_kemitraan_m').value = data.desain.kemitraan.m;
+  document.getElementById('ds_ling_budaya').value = data.desain.lingkungan.budaya;
+  document.getElementById('ds_ling_fisik').value = data.desain.lingkungan.fisik;
+  document.getElementById('ds_ling_virtual').value = data.desain.lingkungan.virtual;
+  document.getElementById('ds_dig_rencana').value = data.desain.digital.rencana;
+  document.getElementById('ds_dig_laksana').value = data.desain.digital.laksana;
+  document.getElementById('ds_dig_asesmen').value = data.desain.digital.asesmen;
+
+  // Pengalaman
+  document.getElementById('pa_mindful').checked = data.pengalaman.awal.mindful;
+  document.getElementById('pa_meaningful').checked = data.pengalaman.awal.meaningful;
+  document.getElementById('pa_joyful').checked = data.pengalaman.awal.joyful;
+  populateList('list_awal', data.pengalaman.awal.langkah);
+  populateList('list_memahami', data.pengalaman.memahami);
+  populateList('list_mengaplikasi', data.pengalaman.mengaplikasi);
+  populateList('list_merefleksi', data.pengalaman.merefleksi);
+  document.getElementById('pp_mindful').checked = data.pengalaman.penutup.mindful;
+  document.getElementById('pp_meaningful').checked = data.pengalaman.penutup.meaningful;
+  document.getElementById('pp_joyful').checked = data.pengalaman.penutup.joyful;
+  populateList('list_penutup', data.pengalaman.penutup.langkah);
+
+  // Asesmen
+  document.getElementById('as_awal').value = data.asesmen.awal;
+  document.getElementById('as_proses').value = data.asesmen.proses;
+  document.getElementById('as_akhir').value = data.asesmen.akhir;
+
+  // Lampiran
+  populateRubrik(data.lampiran.rubrik);
+  document.getElementById('lam_jobsheet').value = data.lampiran.jobsheet;
+  document.getElementById('lam_tempat').value = data.lampiran.tempat;
+  document.getElementById('lam_tanggal').value = data.lampiran.tanggal;
+  document.getElementById('lam_ks').value = data.lampiran.ttd.ks;
+  document.getElementById('lam_kur').value = data.lampiran.ttd.kur;
+  document.getElementById('lam_guru').value = data.lampiran.ttd.guru;
+}
+
+function gatherData() {
+  const gatherList = (id) => Array.from(document.getElementById(id).querySelectorAll('textarea')).map(t => t.value);
+  const gatherRubrik = () => Array.from(document.querySelectorAll('#rubrik_sikap tbody tr')).map(tr => ({
+    aspek: tr.children[0].querySelector('textarea').value,
+    indikator: tr.children[1].querySelector('textarea').value,
+    skor4: tr.children[2].querySelector('textarea').value,
+    skor3: tr.children[3].querySelector('textarea').value,
+    skor2: tr.children[4].querySelector('textarea').value,
+    skor1: tr.children[5].querySelector('textarea').value,
+  }));
+
+  return {
+    identitas: { satuan: document.getElementById('id_satuan').value, mapel: document.getElementById('id_mapel').value, guru: document.getElementById('id_guru').value, kelas: document.getElementById('id_kelas').value, waktu: document.getElementById('id_waktu').value },
+    kp: { level: document.getElementById('kp_level').value, levelDesc: document.getElementById('kp_level_desc').value, minat: document.getElementById('kp_minat').value, minatDesc: document.getElementById('kp_minat_desc').value, bakat: document.getElementById('kp_bakat').value, bakatDesc: document.getElementById('kp_bakat_desc').value, profil: document.getElementById('kp_profil').value, profilDesc: document.getElementById('kp_profil_desc').value },
+    km: { pengetahuan: gatherList('list_pengetahuan'), relevansi: gatherList('list_relevansi'), kesulitan: document.getElementById('km_kesulitan').value, struktur: document.getElementById('km_struktur').value, nilai: gatherList('list_nilai'), dpl: Array.from(document.querySelectorAll('#list_dpl input[type="checkbox"]')).map((cb, i) => ({ label: data.km.dpl[i]?.label || '', checked: cb.checked })) },
+    desain: { capaian: document.getElementById('ds_capaian').value, lintas: document.getElementById('ds_lintas').value, tujuan: gatherList('list_tujuan'), topik: document.getElementById('ds_topik').value, model: document.getElementById('ds_model').value, metode: document.getElementById('ds_metode').value, kemitraan: { s: document.getElementById('ds_kemitraan_s').value, l: document.getElementById('ds_kemitraan_l').value, m: document.getElementById('ds_kemitraan_m').value }, lingkungan: { budaya: document.getElementById('ds_ling_budaya').value, fisik: document.getElementById('ds_ling_fisik').value, virtual: document.getElementById('ds_ling_virtual').value }, digital: { rencana: document.getElementById('ds_dig_rencana').value, laksana: document.getElementById('ds_dig_laksana').value, asesmen: document.getElementById('ds_dig_asesmen').value } },
+    pengalaman: { awal: { mindful: document.getElementById('pa_mindful').checked, meaningful: document.getElementById('pa_meaningful').checked, joyful: document.getElementById('pa_joyful').checked, langkah: gatherList('list_awal') }, memahami: gatherList('list_memahami'), mengaplikasi: gatherList('list_mengaplikasi'), merefleksi: gatherList('list_merefleksi'), penutup: { mindful: document.getElementById('pp_mindful').checked, meaningful: document.getElementById('pp_meaningful').checked, joyful: document.getElementById('pp_joyful').checked, langkah: gatherList('list_penutup') } },
+    asesmen: { awal: document.getElementById('as_awal').value, proses: document.getElementById('as_proses').value, akhir: document.getElementById('as_akhir').value },
+    lampiran: { rubrik: gatherRubrik(), jobsheet: document.getElementById('lam_jobsheet').value, tempat: document.getElementById('lam_tempat').value, tanggal: document.getElementById('lam_tanggal').value, ttd: { ks: document.getElementById('lam_ks').value, kur: document.getElementById('lam_kur').value, guru: document.getElementById('lam_guru').value } }
+  };
+}
+
+let saveTimer;
+function saveToMemory() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    localStorage.setItem('rpp-data-v1', JSON.stringify(gatherData()));
+    const badge = document.getElementById('savedBadge');
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 2000);
+  }, 800);
+}
+
+function resetData() {
+  if (confirm('Reset semua data ke default?')) {
+    localStorage.removeItem('rpp-data-v1');
+    data = JSON.parse(JSON.stringify(defaultData));
+    loadData();
+  }
+}
+
+// Auto-save on any input change
+document.addEventListener('input', saveToMemory);
+document.addEventListener('change', saveToMemory);
+
+function updateDPL(index, checked) {
+  data.km.dpl[index].checked = checked;
+  saveToMemory();
+}
+
+// Initialize
+loadData();
+</script>
+</body>
+</html>
