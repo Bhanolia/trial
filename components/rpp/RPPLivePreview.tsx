@@ -31,7 +31,7 @@ export function RPPLivePreview({ data }: { data: RPPData }) {
 
       <table className="rpp-table">
         <tbody>
-          {/* IDENTITAS */}
+          {/* IDENTITAS - 5 rows */}
           <tr>
             <td rowSpan={5} className="shaded bold center">IDENTITAS</td>
             <td colSpan={3}>Nama Satuan Pendidikan</td>
@@ -43,7 +43,7 @@ export function RPPLivePreview({ data }: { data: RPPData }) {
           <tr><td colSpan={3}>Kelas/ semester</td><td colSpan={2} className="center">:</td><td colSpan={8}>{data.identitas.kelasSemester}</td></tr>
           <tr><td colSpan={3}>Alokasi Waktu</td><td colSpan={2} className="center"></td><td colSpan={8}>{data.identitas.alokasiWaktu}</td></tr>
 
-          {/* IDENTIFIKASI */}
+          {/* IDENTIFIKASI - 19 rows */}
           <tr>
             <td rowSpan={19} className="shaded bold center">IDENTIFIKASI</td>
             <td colSpan={13} className="bold center" style={{background:'#e0e7ff'}}>KARAKTERISTIK PESERTA DIDIK</td>
@@ -54,7 +54,7 @@ export function RPPLivePreview({ data }: { data: RPPData }) {
             <td colSpan={5}>Siap</td>
             <td>Sangat Siap</td>
           </tr>
-          <tr><td colSpan={6}></td><td colSpan={5}>{data.identifikasi.karakteristikPeserta.kesiapanBelajar.deskripsi}</td><td>.</td></tr>
+          <tr><td colSpan={6}></td><td colSpan={5}>{data.identifikasi.karakteristikPeserta.kesiapanBelajar.deskripsi}</td><td className="center">.</td></tr>
           <tr>
             <td rowSpan={2}>Minat</td>
             <td colSpan={6}>Teknik</td>
@@ -99,7 +99,7 @@ export function RPPLivePreview({ data }: { data: RPPData }) {
             </td>
           </tr>
 
-          {/* DPL */}
+          {/* DPL - 4 rows, 2 DPLs per row */}
           <tr>
             <td rowSpan={4} className="bold shaded">Dimensi Profil Lulusan</td>
             <td></td>
@@ -126,7 +126,7 @@ export function RPPLivePreview({ data }: { data: RPPData }) {
             <td colSpan={3}>DPL 8<br/>{allDPL[7]?.label}</td>
           </tr>
 
-          {/* DESAIN PEMBELAJARAN */}
+          {/* DESAIN PEMBELAJARAN - 15 rows */}
           <tr>
             <td rowSpan={15} className="shaded bold center">DESAIN PEMBELAJARAN</td>
             <td colSpan={1}>Capaian Pembelajaran</td>
@@ -166,7 +166,7 @@ export function RPPLivePreview({ data }: { data: RPPData }) {
           <tr><td colSpan={5}>Pelaksanaan Pembelajaran</td><td colSpan={7}>{data.desain.digital.pelaksanaan}</td></tr>
           <tr><td colSpan={5}>Asesmen Pembelajaran</td><td colSpan={7}>{data.desain.digital.asesmen}</td></tr>
 
-          {/* PENGALAMAN BELAJAR */}
+          {/* PENGALAMAN BELAJAR - 10 rows */}
           <tr>
             <td rowSpan={10} className="shaded bold center">PENGALAMAN BELAJAR</td>
             <td colSpan={13} className="bold center" style={{background:'#e0e7ff'}}>Langkah Pembelajaran</td>
@@ -205,7 +205,7 @@ export function RPPLivePreview({ data }: { data: RPPData }) {
           </tr>
           <tr><td colSpan={12}><ul>{data.pengalaman.penutup.langkah.map((l, i) => <li key={i}>{i+1}. {l}</li>)}</ul></td></tr>
 
-          {/* ASESMEN */}
+          {/* ASESMEN - 3 rows */}
           <tr>
             <td rowSpan={3} className="shaded bold center">ASESMEN</td>
             <td colSpan={1}>Asesmen pada Awal Pembelajaran</td>

@@ -1,48 +1,29 @@
-# RPP Editor - Rencana Pelaksanaan Pembelajaran
+# RPP Editor
 
-A comprehensive web-based editor for creating and editing RPP (Rencana Pelaksanaan Pembelajaran / Lesson Plan) documents for Indonesian SMK (Vocational High School) teachers.
+A web-based editor for **Rencana Pelaksanaan Pembelajaran** (RPP) - Lesson Plans for Indonesian SMK (Vocational High School) teachers.
 
 ## Features
 
-- **Complete RPP Structure**: All sections from the official format including:
-  - Identitas (Identity)
-  - Identifikasi (Identification) - Student characteristics & subject characteristics
-  - Desain Pembelajaran (Learning Design) - Objectives, methods, partnerships
-  - Pengalaman Belajar (Learning Experience) - Opening, core, closing activities
-  - Asesmen (Assessment) - Initial, process, final assessment
-  - Lampiran (Appendix) - Rubrics, jobsheets, signatures
-
-- **Smart Editing**:
-  - Tab-based navigation for easy section switching
-  - Dynamic list management (add/remove items)
-  - Auto-save to localStorage
-  - Print-friendly layout
-
-- **Export Options**:
-  - Export to `.docx` (Microsoft Word format)
-  - Print directly from browser
+- **6-Tab Navigation**: Identitas → Identifikasi → Desain → Pengalaman Belajar → Asesmen → Lampiran
+- **DPL Checkboxes**: 8 official Kurikulum Merdeka 2025 dimensions with checkmarks
+- **Auto-Save**: Data persists in browser localStorage automatically
+- **Undo/Redo**: Full history stack with Ctrl+Z / Ctrl+Y (50 states max)
+- **Form Validation**: Prevents export with empty required fields
+- **Live Preview**: Real-time preview matching DOCX output exactly
+- **DOCX Export**: One-click export to Microsoft Word format matching official template
+- **Print Support**: Clean print layout with @media print styles
 
 ## Tech Stack
 
-- **Next.js 15** with App Router
-- **React 19** + TypeScript
-- **Tailwind CSS** for styling
-- **Radix UI** for accessible components
-- **docx.js** for Word export
-- **Lucide React** for icons
+- **Framework**: Next.js 15.1.0 + React 19
+- **Language**: TypeScript 5.7
+- **Styling**: Tailwind CSS 3.4 + shadcn/ui (Radix)
+- **DOCX Engine**: docx.js 9.1.0 + file-saver
+- **Icons**: Lucide React
 
-## Getting Started
-
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
+## Quick Start
 
 ```bash
-# Clone or extract the project
-cd rpp-editor
-
 # Install dependencies
 npm install
 
@@ -52,46 +33,50 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-### Build for Production
+## Build for Production
 
 ```bash
+# Static export (outputs to dist/)
 npm run build
 ```
-
-The static export will be in the `dist/` folder.
-
-## Usage
-
-1. **Fill in each tab** with your lesson plan data
-2. **Add/remove items** using the + and trash buttons
-3. **Auto-save** happens automatically every second
-4. **Export DOCX** to download a Word document
-5. **Print** for a print-friendly version
 
 ## Project Structure
 
 ```
 rpp-editor/
 ├── app/
-│   ├── globals.css      # Global styles + print styles
-│   ├── layout.tsx       # Root layout
-│   └── page.tsx         # Main RPP editor page
+│   ├── page.tsx              # Main page with undo/redo, validation
+│   ├── layout.tsx            # Root layout
+│   └── globals.css           # Tailwind + print styles
 ├── components/
-│   └── ui/              # Reusable UI components
+│   ├── ui/                   # shadcn/ui primitives
+│   └── rpp/                  # 7 tab components + live preview
+│       ├── IdentitasTab.tsx
+│       ├── IdentifikasiTab.tsx
+│       ├── DesainTab.tsx
+│       ├── PengalamanTab.tsx
+│       ├── AsesmenTab.tsx
+│       ├── LampiranTab.tsx
+│       └── RPPLivePreview.tsx
 ├── lib/
-│   ├── utils.ts         # Utility functions (cn)
-│   └── docx-export.ts   # DOCX export logic
+│   ├── utils.ts              # cn() helper
+│   ├── docx-export.ts        # DOCX generation engine
+│   └── validation.ts         # Form validation
 ├── types/
-│   └── rpp.ts           # TypeScript types + default data
-├── package.json
-├── next.config.js
-├── tailwind.config.js
-└── tsconfig.json
+│   └── rpp.ts                # TypeScript types + defaults
+└── package.json
 ```
 
-## Customization
+## Official 8 DPL (Dimensi Profil Lulusan)
 
-The default data is defined in `types/rpp.ts` under `defaultRPP`. You can modify this to match your school's default template.
+1. Beriman, bertakwa kepada Tuhan Yang Maha Esa, dan berakhlak mulia
+2. Berkebinekaan global
+3. Bergotong royong
+4. Mandiri
+5. Bernalar kritis
+6. Kreatif
+7. Cinta lingkungan
+8. Sehat jasmani dan rohani
 
 ## License
 

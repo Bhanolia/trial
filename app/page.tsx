@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RPPData, defaultRPP, migrateRPPData } from "@/types/rpp";
@@ -40,7 +40,6 @@ export default function RPPEditor() {
 
   const isFirstLoad = useRef(true);
 
-  // Load from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("rpp-data");
@@ -54,7 +53,6 @@ export default function RPPEditor() {
     }
   }, []);
 
-  // Auto-save
   useEffect(() => {
     if (isFirstLoad.current) {
       isFirstLoad.current = false;
@@ -68,7 +66,6 @@ export default function RPPEditor() {
     return () => clearTimeout(timer);
   }, [history.present]);
 
-  // Keyboard shortcuts: Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
@@ -84,7 +81,7 @@ export default function RPPEditor() {
     return () => window.removeEventListener("keydown", handler);
   }, [history]);
 
-  const setData = (updater: (prev: RPPData) => RPPData) => {
+  const setData = useCallback((updater: (prev: RPPData) => RPPData) => {
     setHistory(prev => {
       const newPresent = updater(prev.present);
       return {
@@ -94,7 +91,7 @@ export default function RPPEditor() {
       };
     });
     setShowErrors(false);
-  };
+  }, []);
 
   const handleUndo = () => {
     setHistory(prev => {
@@ -151,7 +148,6 @@ export default function RPPEditor() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b shadow-sm no-print">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
@@ -197,7 +193,6 @@ export default function RPPEditor() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6 no-print">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-6 w-full">
@@ -242,7 +237,6 @@ export default function RPPEditor() {
         </Tabs>
       </main>
 
-      {/* Live Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 no-print">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-auto">
@@ -259,7 +253,6 @@ export default function RPPEditor() {
         </div>
       )}
 
-      {/* Print-only preview */}
       <div className="print-only hidden">
         <RPPLivePreview data={data} />
       </div>

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RPP Editor - Rencana Pelaksanaan Pembelajaran",
-  description: "Web-based editor for creating and editing RPP documents",
+  title: "RPP Editor",
+  description: "Rencana Pelaksanaan Pembelajaran - Deep Learning",
 };
 
 export default function RootLayout({
