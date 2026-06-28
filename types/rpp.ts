@@ -20,7 +20,12 @@ export interface Identitas {
 export interface Identifikasi {
   karakteristikPeserta: KarakteristikPeserta;
   karakteristikMapel: KarakteristikMapel;
-  dimensiProfilLulusan: { label: string; checked: boolean }[];
+  dimensiProfilLulusan: DPLItem[];
+}
+
+export interface DPLItem {
+  label: string;
+  checked: boolean;
 }
 
 export interface KarakteristikPeserta {
@@ -134,6 +139,18 @@ export interface Penandatangan {
   guru: string;
 }
 
+// Official 8 DPL (Dimensi Profil Lulusan) for Deep Learning / Pembelajaran Mendalam
+export const defaultDPL: DPLItem[] = [
+  { label: "Keimanan dan Ketakwaan terhadap Tuhan Yang Maha Esa", checked: false },
+  { label: "Kewargaan", checked: false },
+  { label: "Penalaran Kritis", checked: false },
+  { label: "Kreativitas", checked: false },
+  { label: "Kolaborasi", checked: false },
+  { label: "Kemandirian", checked: false },
+  { label: "Kesehatan", checked: false },
+  { label: "Komunikasi", checked: false },
+];
+
 export const defaultRPP: RPPData = {
   identitas: {
     satuanPendidikan: "SMK",
@@ -173,16 +190,7 @@ export const defaultRPP: RPPData = {
         "Safety / Keselamatan",
       ],
     },
-    dimensiProfilLulusan: [
-      { label: "DPL 1 - Keimanan dan ketakwaan terhadap Tuhan yang Maha Esa", checked: true },
-      { label: "DPL 2 - Kewargaan", checked: false },
-      { label: "DPL 3 - Penalaran Kritis", checked: true },
-      { label: "DPL 4 - Kreativitas", checked: false },
-      { label: "DPL 5 - Kolaborasi", checked: true },
-      { label: "DPL 6 - Kemandirian", checked: false },
-      { label: "DPL 7 - Kesehatan", checked: false },
-      { label: "DPL 8 - Komunikasi", checked: true },
-    ],
+    dimensiProfilLulusan: JSON.parse(JSON.stringify(defaultDPL)),
   },
   desain: {
     capaianPembelajaran: "Pada akhir fase E, murid mampu: melakukan menggunakan peralatan umum (general tools), alat perlengkapan bengkel (equipment tools), peralatan servis khusus (special service tools), alat ukur (measuring tools), dan alat diagnosis (diagnostic tools).",
@@ -313,3 +321,62 @@ export const defaultRPP: RPPData = {
   tanggal: "02 Juni 2025",
   tempat: "Kota",
 };
+
+/** Migrate old localStorage data to current format */
+export function migrateRPPData(raw: any): RPPData {
+  if (!raw || typeof raw !== "object") return defaultRPP;
+
+  const data: any = { ...defaultRPP, ...raw };
+
+  // Fix DPL: old format was string[] or objects without label
+  if (data.identifikasi?.dimensiProfilLulusan) {
+    const dpl = data.identifikasi.dimensiProfilLulusan;
+    if (Array.isArray(dpl)) {
+      if (dpl.length === 0) {
+        data.identifikasi.dimensiProfilLulusan = JSON.parse(JSON.stringify(defaultDPL));
+      } else if (typeof dpl[0] === "string") {
+        // Old format: array of strings
+        const checkedSet = new Set(dpl as string[]);
+        data.identifikasi.dimensiProfilLulusan = defaultDPL.map(item => ({
+          label: item.label,
+          checked: checkedSet.has(item.label),
+        }));
+      } else if (typeof dpl[0] === "object") {
+        // Object format, but may have missing labels or old labels
+        data.identifikasi.dimensiProfilLulusan = defaultDPL.map((defaultItem) => {
+          const saved = dpl.find((d: any) => d.label === defaultItem.label);
+          if (saved && typeof saved === "object" && saved.label) {
+            return { label: saved.label, checked: !!saved.checked };
+          }
+          return { label: defaultItem.label, checked: false };
+        });
+      }
+    } else {
+      data.identifikasi.dimensiProfilLulusan = JSON.parse(JSON.stringify(defaultDPL));
+    }
+  } else {
+    data.identifikasi = { ...data.identifikasi, dimensiProfilLulusan: JSON.parse(JSON.stringify(defaultDPL)) };
+  }
+
+  // Ensure all nested objects exist
+  if (!data.identifikasi.karakteristikPeserta) {
+    data.identifikasi.karakteristikPeserta = defaultRPP.identifikasi.karakteristikPeserta;
+  }
+  if (!data.identifikasi.karakteristikMapel) {
+    data.identifikasi.karakteristikMapel = defaultRPP.identifikasi.karakteristikMapel;
+  }
+  if (!data.lampiran) {
+    data.lampiran = defaultRPP.lampiran;
+  }
+  if (!data.lampiran.rubrikSikap || !Array.isArray(data.lampiran.rubrikSikap)) {
+    data.lampiran.rubrikSikap = defaultRPP.lampiran.rubrikSikap;
+  }
+  if (!data.lampiran.rubrikPresentasi) {
+    data.lampiran.rubrikPresentasi = defaultRPP.lampiran.rubrikPresentasi;
+  }
+  if (!data.lampiran.penandatangan) {
+    data.lampiran.penandatangan = defaultRPP.lampiran.penandatangan;
+  }
+
+  return data as RPPData;
+}

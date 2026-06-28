@@ -2,8 +2,8 @@
 
 import {
   Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType,
-  AlignmentType, HeadingLevel, BorderStyle, TextRun, VerticalAlign,
-  convertInchesToTwip, Header, Footer, PageNumber
+  AlignmentType, BorderStyle, TextRun, VerticalAlign,
+  convertInchesToTwip
 } from "docx";
 import { saveAs } from "file-saver";
 import { RPPData } from "@/types/rpp";
@@ -48,6 +48,38 @@ function createMultiLineCell(lines: string[], options: any = {}): TableCell {
   });
 }
 
+function createEmptyParagraphCell(options: any = {}): TableCell {
+  return new TableCell({
+    children: [new Paragraph({ spacing: { before: 600, after: 600 }, children: [new TextRun("")] })],
+    verticalAlign: VerticalAlign.CENTER,
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+      left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+      right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+    },
+  });
+}
+
+function createSignatureCell(name: string): TableCell {
+  return new TableCell({
+    children: [
+      new Paragraph({ spacing: { before: 600, after: 600 }, children: [new TextRun("")] }),
+      new Paragraph({
+        children: [new TextRun({ text: name || "_________________", size: 20 })],
+        alignment: AlignmentType.CENTER,
+      }),
+    ],
+    verticalAlign: VerticalAlign.CENTER,
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+      left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+      right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+    },
+  });
+}
+
 export async function exportToDocx(data: RPPData) {
   const rows: TableRow[] = [];
 
@@ -60,45 +92,42 @@ export async function exportToDocx(data: RPPData) {
   }));
 
   // IDENTITAS
-  const identitasRows = [
-    new TableRow({
-      children: [
-        createCell("IDENTITAS", { bold: true, rowSpan: 5, shading: "F3F4F6" }),
-        createCell("Nama Satuan Pendidikan"),
-        createCell(":", { width: 5 }),
-        createCell(data.identitas.satuanPendidikan, { colSpan: 8 }),
-      ],
-    }),
-    new TableRow({
-      children: [
-        createCell("Mata Pelajaran"),
-        createCell(":", { width: 5 }),
-        createCell(data.identitas.mataPelajaran, { colSpan: 8 }),
-      ],
-    }),
-    new TableRow({
-      children: [
-        createCell("Nama Guru"),
-        createCell(":", { width: 5 }),
-        createCell(data.identitas.namaGuru, { colSpan: 8 }),
-      ],
-    }),
-    new TableRow({
-      children: [
-        createCell("Kelas/ semester"),
-        createCell(":", { width: 5 }),
-        createCell(data.identitas.kelasSemester, { colSpan: 8 }),
-      ],
-    }),
-    new TableRow({
-      children: [
-        createCell("Alokasi Waktu"),
-        createCell("", { width: 5 }),
-        createCell(data.identitas.alokasiWaktu, { colSpan: 8 }),
-      ],
-    }),
-  ];
-  rows.push(...identitasRows);
+  rows.push(new TableRow({
+    children: [
+      createCell("IDENTITAS", { bold: true, rowSpan: 5, shading: "F3F4F6" }),
+      createCell("Nama Satuan Pendidikan"),
+      createCell(":", { width: 5 }),
+      createCell(data.identitas.satuanPendidikan, { colSpan: 8 }),
+    ],
+  }));
+  rows.push(new TableRow({
+    children: [
+      createCell("Mata Pelajaran"),
+      createCell(":", { width: 5 }),
+      createCell(data.identitas.mataPelajaran, { colSpan: 8 }),
+    ],
+  }));
+  rows.push(new TableRow({
+    children: [
+      createCell("Nama Guru"),
+      createCell(":", { width: 5 }),
+      createCell(data.identitas.namaGuru, { colSpan: 8 }),
+    ],
+  }));
+  rows.push(new TableRow({
+    children: [
+      createCell("Kelas/ semester"),
+      createCell(":", { width: 5 }),
+      createCell(data.identitas.kelasSemester, { colSpan: 8 }),
+    ],
+  }));
+  rows.push(new TableRow({
+    children: [
+      createCell("Alokasi Waktu"),
+      createCell("", { width: 5 }),
+      createCell(data.identitas.alokasiWaktu, { colSpan: 8 }),
+    ],
+  }));
 
   // IDENTIFIKASI - Karakteristik Peserta Didik
   rows.push(new TableRow({
@@ -216,19 +245,30 @@ export async function exportToDocx(data: RPPData) {
   const checkedDPL = data.identifikasi.dimensiProfilLulusan.filter(d => d.checked);
   const uncheckedDPL = data.identifikasi.dimensiProfilLulusan.filter(d => !d.checked);
 
+  const totalDPLRows = Math.max(1, Math.ceil(checkedDPL.length / 2)) + (uncheckedDPL.length > 0 ? 1 + Math.max(1, Math.ceil(uncheckedDPL.length / 2)) : 0);
+  const dplRowSpan = Math.max(4, totalDPLRows + 1);
+
   rows.push(new TableRow({
     children: [
-      createCell("Dimensi Profil Lulusan", { bold: true, rowSpan: Math.max(4, Math.ceil(data.identifikasi.dimensiProfilLulusan.length / 2)) }),
+      createCell("Dimensi Profil Lulusan", { bold: true, rowSpan: dplRowSpan }),
       createCell("DPL yang dicapai:", { bold: true, colSpan: 11, shading: "E0E7FF" }),
     ],
   }));
 
   // Show checked DPLs in 2-column layout
-  for (let i = 0; i < checkedDPL.length; i += 2) {
+  if (checkedDPL.length > 0) {
+    for (let i = 0; i < checkedDPL.length; i += 2) {
+      rows.push(new TableRow({
+        children: [
+          createCell(`[v] ${checkedDPL[i].label}`, { colSpan: 5 }),
+          createCell(checkedDPL[i + 1] ? `[v] ${checkedDPL[i + 1].label}` : "", { colSpan: 6 }),
+        ],
+      }));
+    }
+  } else {
     rows.push(new TableRow({
       children: [
-        createCell(`[v] ${checkedDPL[i].label}`, { colSpan: 5 }),
-        createCell(checkedDPL[i + 1] ? `[v] ${checkedDPL[i + 1].label}` : "", { colSpan: 6 }),
+        createCell("(Tidak ada DPL yang dicentang)", { colSpan: 11, align: AlignmentType.CENTER }),
       ],
     }));
   }
@@ -545,43 +585,16 @@ export async function exportToDocx(data: RPPData) {
             }),
             new TableRow({
               children: [
-                new TableCell({
-                  children: [new Paragraph({ spacing: { before: 600, after: 600 }, children: [new TextRun("")] })],
-                  verticalAlign: VerticalAlign.CENTER,
-                  borders: {
-                    top: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                  },
-                }),
-                new TableCell({
-                  children: [new Paragraph({ spacing: { before: 600, after: 600 }, children: [new TextRun("")] })],
-                  verticalAlign: VerticalAlign.CENTER,
-                  borders: {
-                    top: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                  },
-                }),
-                new TableCell({
-                  children: [new Paragraph({ spacing: { before: 600, after: 600 }, children: [new TextRun("")] })],
-                  verticalAlign: VerticalAlign.CENTER,
-                  borders: {
-                    top: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                    right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-                  },
-                }),
+                createEmptyParagraphCell(),
+                createEmptyParagraphCell(),
+                createEmptyParagraphCell(),
               ],
             }),
             new TableRow({
               children: [
-                createCell(data.lampiran.penandatangan.kepalaSekolah || "_________________", { align: AlignmentType.CENTER }),
-                createCell(data.lampiran.penandatangan.kurikulum || "_________________", { align: AlignmentType.CENTER }),
-                createCell(data.lampiran.penandatangan.guru || "_________________", { align: AlignmentType.CENTER }),
+                createSignatureCell(data.lampiran.penandatangan.kepalaSekolah),
+                createSignatureCell(data.lampiran.penandatangan.kurikulum),
+                createSignatureCell(data.lampiran.penandatangan.guru),
               ],
             }),
           ],

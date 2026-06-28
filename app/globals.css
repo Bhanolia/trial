@@ -90,4 +90,10 @@
   body {
     background: white;
   }
+  /* Ensure preview prints nicely */
+  .rpp-preview {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
 }
